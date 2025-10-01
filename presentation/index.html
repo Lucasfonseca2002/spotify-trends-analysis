@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <!-- Metadados essenciais -->
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Landing page de insights analíticos de músicas do Spotify. 114.000 faixas analisadas com visualizações interativas." />
+
+  <title>Spotify Analytics — Insights de Tendências Musicais</title>
+
+  <!-- Tipografia (Design System) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@700&display=swap" rel="stylesheet" />
+
+  <!-- DataTables CSS -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+  <!-- Intro.js CSS (Tour guiado) -->
+  <link rel="stylesheet" href="https://unpkg.com/intro.js/minified/introjs.min.css" />
+
+  <!-- Estilos embutidos (CSS3, mobile-first) -->
+  <style>
+    :root {
+      /* Design System Colors */
+      --color-primary: #1DB954; /* Spotify Green */
+      --color-bg: #121212;
+      --color-surface: #282828;
+      --color-text: #FFFFFF;
+      --color-text-secondary: #B3B3B3;
+      --color-muted: #535353;
+      --color-alert: #ff9f43; /* Destaque laranja */
+
+      /* Layout & Components */
+      --radius: 12px;
+      --shadow: 0 4px 20px rgba(0,0,0,0.3);
+      --transition: 0.3s ease;
+      --header-height: 80px;
+      --max-width: 1200px;
+    }
+
+    /* Reset básico e acessibilidade */
+    html { scroll-behavior: smooth; }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--color-bg);
+      color: var(--color-text);
+      line-height: 1.6;
+      text-rendering: optimizeLegibility;
+    }
+    a { color: var(--color-primary); text-decoration: none; }
+    a:focus { outline: 2px solid var(--color-primary); outline-offset: 3px; }
+    img { max-width: 100%; height: auto; }
+
+    /* Skip link para acessibilidade */
+    .skip-link {
+      position: absolute;
+      left: -999px;
+      top: -999px;
+    }
+    .skip-link:focus {
+      left: 16px; top: 16px; z-index: 10000;
+      background: var(--color-primary);
+      color: #000; padding: 8px 12px; border-radius: 6px;
+    }
+
+    /* Header fixo */
+    header {
+      position: fixed; inset: 0 0 auto 0; height: var(--header-height);
+      background: rgba(24,24,24,0.8);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      box-shadow: var(--shadow);
+      z-index: 999;
+    }
+    .container {
+      width: 100%; max-width: var(--max-width); margin: 0 auto; padding: 0 16px;
+    }
+    .nav {
+      display: flex; align-items: center; justify-content: space-between; height: var(--header-height);
+    }
+    .logo { font-family: Poppins, sans-serif; font-weight: 700; font-size: 18px; letter-spacing: 0.4px; }
+    .logo span { color: var(--color-primary); }
+    nav ul { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; }
+    nav a { color: var(--color-text); font-weight: 600; }
+    nav a:hover { color: var(--color-primary); }
+
+    /* Espaçamento do main considerando header fixo */
+    main { padding-top: calc(var(--header-height) + 24px); }
+    section { scroll-margin-top: calc(var(--header-height) + 16px); }
+
+    /* Hero */
+    .hero {
+      padding: 40px 0 24px;
+    }
+    .hero h1 {
+      font-family: Poppins, sans-serif; font-weight: 700; font-size: 28px; margin: 0 0 8px;
+    }
+    .hero p { color: var(--color-text-secondary); margin: 0 0 24px; }
+
+    /* Cards métricos */
+    .grid {
+      display: grid; gap: 16px;
+    }
+    .grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+    .grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+    .grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+    @media (min-width: 640px) {
+      .grid.cols-sm-4 { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media (min-width: 900px) {
+      .grid.cols-md-3 { grid-template-columns: repeat(3, 1fr); }
+    }
+    .card {
+      background: rgba(40,40,40,0.85);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+      backdrop-filter: blur(6px);
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.4); }
+    .metric { font-size: 14px; color: var(--color-text-secondary); }
+    .value { font-family: Poppins, sans-serif; font-size: 20px; font-weight: 700; margin-top: 6px; }
+    .badge { display: inline-block; border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 999px; padding: 2px 8px; font-size: 12px; margin-left: 8px; }
+    .alert {
+      border-left: 4px solid var(--color-alert);
+      background: rgba(255,159,67,0.1);
+      color: #ffd8a6; /* Mantém bom contraste no fundo escuro */
+    }
+
+    /* Títulos de seção */
+    .section-title { font-family: Poppins, sans-serif; font-weight: 700; font-size: 22px; margin: 16px 0; }
+    .section-subtitle { color: var(--color-text-secondary); margin-bottom: 16px; }
+
+    /* Área de gráficos */
+    .chart-wrap { position: relative; min-height: 220px; }
+    .chart-wide { min-height: 320px; }
+    @media (min-width: 900px) { .chart-wide { min-height: 380px; } }
+    .skeleton {
+      position: absolute; inset: 0; border-radius: var(--radius);
+      background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.12) 37%, rgba(255,255,255,0.06) 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+
+    /* DataTable wrapper para scroll em mobile */
+    .table-wrap { overflow-x: auto; background: rgba(40,40,40,0.6); border-radius: var(--radius); border: 1px solid rgba(255,255,255,0.06); }
+    table.dataTable { width: 100% !important; }
+
+    /* Footer */
+    footer { margin-top: 32px; padding: 24px 0 48px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .cta-btn { display: inline-block; padding: 10px 14px; border: 1px solid var(--color-primary); color: var(--color-primary); border-radius: 10px; font-weight: 600; transition: background var(--transition), color var(--transition), transform var(--transition); }
+    .cta-btn:hover { background: rgba(29,185,84,0.15); transform: translateY(-2px); }
+
+    /* Fade-in ao scroll */
+    .fade { opacity: 0; transform: translateY(10px); transition: opacity var(--transition), transform var(--transition); }
+    .fade.visible { opacity: 1; transform: none; }
+
+    /* Utilidades */
+    .mt-12 { margin-top: 12px; }
+    .mt-16 { margin-top: 16px; }
+    .mt-24 { margin-top: 24px; }
+    .mt-32 { margin-top: 32px; }
+    .mb-16 { margin-bottom: 16px; }
+    .mb-24 { margin-bottom: 24px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 900px) { .grid-2 { grid-template-columns: 1fr 1fr; } }
+
+    /* Destaque top 3 gêneros */
+    .top3 { background: linear-gradient(135deg, rgba(29,185,84,0.15), rgba(40,40,40,0.85)); }
+    .badge-top { display:inline-block; margin-left:8px; padding:2px 8px; border-radius:999px; background: rgba(29,185,84,0.18); color:#8ff0b3; border:1px solid rgba(29,185,84,0.5); font-size:12px; }
+
+    /* Controles da tabela */
+    .table-controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+    .btn { display:inline-block; padding:8px 12px; border:1px solid rgba(255,255,255,0.12); border-radius:8px; color:var(--color-text); transition: var(--transition); background: rgba(255,255,255,0.04); }
+    .btn:hover { background: rgba(255,255,255,0.08); transform: translateY(-2px); }
+    /* Acessibilidade e visibilidade do select e opções */
+    select.btn { background: var(--color-surface); color: var(--color-text); }
+    select.btn:focus { outline: 2px solid var(--color-primary); }
+    select.btn option { color: #111827; background: #ffffff; }
+
+    /* Modal "Ver Código" */
+    .modal { position: fixed; inset: 0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,0.55); z-index: 1000; }
+    .modal.open { display:flex; }
+    .modal-card { width: min(800px, 92vw); background: var(--color-surface); border:1px solid rgba(255,255,255,0.08); border-radius: 12px; box-shadow: var(--shadow); padding:16px; color: var(--color-text); }
+    .modal-header { display:flex; align-items:center; justify-content:space-between; }
+    .modal-body { max-height: 60vh; overflow:auto; }
+    pre { background: rgba(255,255,255,0.06); padding:12px; border-radius:8px; overflow:auto; }
+    .close-btn { cursor:pointer; font-weight:700; }
+
+    /* Botão voltar ao topo */
+    .back-to-top { position: fixed; right: 16px; bottom: 16px; z-index: 999; display:none; }
+    .back-to-top.show { display:block; }
+
+    /* Sobre o Projeto */
+    .about { padding: 24px 0; }
+    .pills { display:flex; gap:8px; flex-wrap:wrap; }
+    .pill { border:1px solid rgba(255,255,255,0.14); border-radius:999px; padding:6px 10px; color: var(--color-text-secondary); background: rgba(255,255,255,0.05); }
+
+    /* Stepper/Timeline */
+    .stepper { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .step { display:flex; align-items:center; gap:8px; }
+    .step .dot { width:10px; height:10px; border-radius:50%; background: var(--color-primary); }
+    .step .arrow { width: 24px; height: 2px; background: var(--color-primary); }
+
+  </style>
+
+  <!-- Bibliotecas (CDN): Chart.js, jQuery e DataTables -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+  <!-- Intro.js (Tour guiado) -->
+  <script src="https://unpkg.com/intro.js/minified/intro.min.js"></script>
+</head>
+
+<body>
+  <!-- Link para pular direto ao conteúdo (acessibilidade) -->
+  <a href="#overview" class="skip-link">Ir para conteúdo principal</a>
+
+  <!-- Header fixo com navegação -->
+  <header role="banner" aria-label="Cabeçalho principal">
+    <div class="container">
+      <div class="nav">
+        <div class="logo" aria-label="Logo Spotify Analytics">🎵 <span>Spotify</span> Analytics</div>
+        <nav aria-label="Navegação principal">
+          <ul>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#insights">Insights</a></li>
+            <li><a href="#metodologia">Metodologia</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo principal -->
+  <main id="overview" role="main">
+    <div class="container">
+      <!-- Hero Section -->
+      <section class="hero fade" aria-labelledby="hero-title">
+        <!-- Título e subtítulo -->
+        <h1 id="hero-title">Desvendando a Fórmula dos Hits no Spotify</h1>
+        <p class="section-subtitle">Análise de 114.000 músicas revelando padrões de sucesso</p>
+
+        <!-- Grid de métricas (4 colunas em telas maiores) -->
+        <div class="grid cols-2 cols-sm-4">
+          <div class="card" aria-label="114.000 Músicas Analisadas"><div class="metric">Total analisado</div><div class="value">114.000 Músicas</div></div>
+          <div class="card" aria-label="114 Gêneros Únicos"><div class="metric">Variedade</div><div class="value">114 Gêneros</div></div>
+          <div class="card" aria-label="33.1 Popularidade Média"><div class="metric">Popularidade média</div><div class="value">33.1</div></div>
+          <div class="card" aria-label="1.201 Hits Identificados"><div class="metric">Hits</div><div class="value">1.201</div></div>
+        </div>
+      </section>
+      <!-- Seção "Top Colaborações" -->
+      <section class="fade mt-32" aria-labelledby="colabs-title">
+        <h2 class="section-title" id="colabs-title">Top Colaborações</h2>
+        <div id="collabsGrid" class="grid cols-3 cols-md-3"></div>
+      </section>
+
+      <!-- Seção "Fórmula do Sucesso" -->
+      <section id="insights" class="fade mt-24" aria-labelledby="insights-title">
+        <h2 class="section-title" id="insights-title">Fórmula do Sucesso</h2>
+        <p class="section-subtitle">Comparativo de atributos entre Hits (80+) e Médias (0–39)</p>
+
+        <div class="card">
+          <div class="chart-wrap chart-wide" aria-label="Gráfico de barras horizontais comparativo">
+            <div class="skeleton" aria-hidden="true"></div>
+            <canvas id="barHits" aria-label="Danceability, Energy, Acousticness, Instrumentalness" role="img"></canvas>
+          </div>
+        </div>
+
+        <div class="card alert mt-16" role="note" aria-live="polite">
+          ⚠️ Descoberta Contra-Intuitiva: Valence (felicidade) não prediz sucesso. Diferença de apenas 4% entre hits e flops.
+        </div>
+      </section>
+
+      <!-- Seção "Duração Ideal" -->
+      <section class="fade mt-32" aria-labelledby="duracao-title">
+        <h2 class="section-title" id="duracao-title">Duração Ideal</h2>
+        <div class="grid-2">
+          <div>
+            <div class="grid cols-3 cols-md-3">
+              <div class="card" aria-label="Curtas menor que 3 minutos">
+                <div class="metric">Curtas (&lt;3min)</div>
+                <div class="value">32.332 músicas</div>
+                <div class="metric mt-12">Popularidade: 31.37</div>
+              </div>
+              <div class="card" aria-label="Médias entre 3 e 4 minutos">
+                <div class="metric">Médias (3–4min) <span class="badge" aria-label="Ideal">✓ Ideal</span></div>
+                <div class="value">42.488 músicas</div>
+                <div class="metric mt-12">Popularidade: 34.68</div>
+              </div>
+              <div class="card" aria-label="Longas maiores que 4 minutos">
+                <div class="metric">Longas (&gt;4min)</div>
+                <div class="value">39.180 músicas</div>
+                <div class="metric mt-12">Popularidade: 33.21</div>
+              </div>
+            </div>
+
+            <div class="card mt-16">
+              <div class="chart-wrap" aria-label="Distribuição por modo maior/menor">
+                <div class="skeleton" aria-hidden="true"></div>
+                <canvas id="donutMode" aria-label="Modo maior e menor" role="img"></canvas>
+              </div>
+              <p class="section-subtitle mt-12">Maior: 72.681 (63.7%) • Menor: 41.319 (36.3%)</p>
+            </div>
+          </div>
+
+          <!-- Top Gêneros com DataTables -->
+          <div>
+            <div class="card" id="genre-analysis" data-intro="Análise de gêneros com filtros e exportação.">
+              <h3 class="section-title" style="margin-top:0">Top Gêneros</h3>
+              <div class="table-controls" aria-label="Controles da tabela">
+                <input id="searchGenre" class="btn" type="text" placeholder="Buscar gênero..." aria-label="Buscar gênero" />
+                <select id="popFilter" class="btn" aria-label="Filtrar por popularidade">
+                  <option value="all">Popularidade: Todos</option>
+                  <option value=">50">&gt; 50</option>
+                  <option value="40-50">40–50</option>
+                  <option value="<40">&lt; 40</option>
+                </select>
+                <button id="exportCsv" class="btn" aria-label="Exportar CSV">Exportar CSV</button>
+                <button id="resetFilters" class="btn" aria-label="Resetar filtros">Reset filtros</button>
+              </div>
+              <div class="table-wrap" aria-label="Tabela interativa de gêneros">
+                <table id="genresTable" class="display" style="width:100%">
+                  <thead>
+                    <tr>
+                      <th>Gênero</th>
+                      <th>Popularidade ↓</th>
+                      <th>Danceability</th>
+                      <th>Energy</th>
+                      <th>Acousticness</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+              <p class="section-subtitle mt-12">Top 3 gêneros destacados com badge.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Seção "Quadrantes de Humor" -->
+      <section class="fade mt-32" aria-labelledby="humor-title">
+        <h2 class="section-title" id="humor-title">Quadrantes de Humor</h2>
+        <p class="section-subtitle">Energia (X) vs. Positividade (Y) com linhas divisórias em 0.6</p>
+        <div class="table-controls" aria-label="Controles do gráfico">
+          <button id="resetZoom" class="btn" aria-label="Resetar zoom">Reset Zoom</button>
+          <button id="clearSelection" class="btn" aria-label="Limpar seleção">Limpar Seleção</button>
+        </div>
+        <div class="card">
+          <div class="chart-wrap" aria-label="Scatter plot de quadrantes de humor" id="mood-plot" data-intro="Zoom/pan e detalhes ao clicar.">
+            <div class="skeleton" aria-hidden="true"></div>
+            <canvas id="scatterMood" aria-label="Quadrantes de humor" role="img"></canvas>
+          </div>
+        </div>
+        <div id="moodDetails" class="card mt-16" aria-live="polite" style="display:none"></div>
+        <div class="grid cols-2 mt-16">
+          <div class="card"><strong>Q1:</strong> Energético e Positivo</div>
+          <div class="card"><strong>Q2:</strong> Calmo e Positivo</div>
+          <div class="card"><strong>Q3:</strong> Calmo e Melancólico</div>
+          <div class="card"><strong>Q4:</strong> Energético e Intenso</div>
+        </div>
+      </section>
+
+      <!-- Seção "Insights de Artistas" -->
+      <section class="fade mt-32" aria-labelledby="artistas-title">
+        <h2 class="section-title" id="artistas-title">Insights de Artistas</h2>
+        <div class="grid cols-3 cols-md-3">
+          <div class="card" aria-label="Top colaboração">
+            <div class="metric" style="font-size:22px">🤝 Top Colaboração</div>
+            <div class="value">Pritam &amp; Arijit Singh</div>
+            <div class="metric mt-12">109 músicas | 55.1 popularidade</div>
+          </div>
+          <div class="card" aria-label="Mais Versátil">
+            <div class="metric" style="font-size:22px">🎭 Mais Versátil</div>
+            <div class="value">Tiësto</div>
+            <div class="metric mt-12">16 gêneros explorados</div>
+            <div class="chart-wrap mt-12" style="min-height:120px">
+              <canvas id="miniTiesto" aria-label="Distribuição de gêneros do Tiësto"></canvas>
+            </div>
+          </div>
+          <div class="card" aria-label="Maior Amplitude">
+            <div class="metric" style="font-size:22px">📊 Maior Amplitude</div>
+            <div class="value">Kim Petras</div>
+            <div class="metric mt-12">Variação de 100 pontos</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Footer / Metodologia -->
+    <footer id="metodologia" class="fade" aria-labelledby="metodologia-title">
+      <div class="container">
+        <div class="grid-2">
+          <div class="card" aria-label="Metodologia">
+            <h3 class="section-title" id="metodologia-title" style="margin-top:0">Metodologia</h3>
+            <ul>
+              <li>Ingestão e limpeza de dados</li>
+              <li>Análise exploratória (SQL básico)</li>
+              <li>Normalização de schema (ETL)</li>
+              <li>Análises complexas (JOINs, CTEs, Window Functions)</li>
+            </ul>
+          </div>
+          <div class="card" aria-label="Tecnologias">
+            <h3 class="section-title" style="margin-top:0">Tecnologias</h3>
+            <ul>
+              <li>PostgreSQL 14+</li>
+              <li>Dataset: Kaggle Spotify Tracks</li>
+              <li>114.000 registros analisados</li>
+            </ul>
+            <a id="openCode" class="cta-btn mt-12" href="#" aria-label="Ver Análises SQL Interativas">Ver Análises SQL Interativas</a>
+            <div class="pills mt-12" aria-label="Tecnologias usadas">
+              <span class="pill">PostgreSQL</span>
+              <span class="pill">DataGrip</span>
+              <span class="pill">CTEs</span>
+              <span class="pill">Window Functions</span>
+              <span class="pill">JOINs</span>
+            </div>
+            <div class="stepper mt-16" aria-label="Fluxo ETL">
+              <div class="step"><span class="dot" aria-hidden="true"></span><span>Ingestão</span><span class="arrow" aria-hidden="true"></span></div>
+              <div class="step"><span class="dot" aria-hidden="true"></span><span>Exploração</span><span class="arrow" aria-hidden="true"></span></div>
+              <div class="step"><span class="dot" aria-hidden="true"></span><span>Normalização</span><span class="arrow" aria-hidden="true"></span></div>
+              <div class="step"><span class="dot" aria-hidden="true"></span><span>Análise</span></div>
+            </div>
+            <div class="mt-12">
+              <a href="https://www.linkedin.com/in/lucas-fonseca-21080a203/" target="_blank" rel="noopener" class="cta-btn" aria-label="LinkedIn">LinkedIn</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- Sobre o Projeto -->
+  <section class="about fade" aria-labelledby="sobre-title">
+    <div class="container">
+      <h2 class="section-title" id="sobre-title">Sobre o Projeto</h2>
+      <p class="section-subtitle">Contexto, objetivos e fontes de dados utilizados.</p>
+      <div class="card">
+        <p>Este dashboard apresenta insights extraídos de 114.000 músicas do Spotify (Kaggle). Objetivo: revelar padrões de sucesso em atributos musicais e comportamento por gênero musicais, faixas musicais, artistas, colaborações.</p>
+        <p><a href="https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset" target="_blank" rel="noopener">Dataset fonte (Kaggle)</a> • <a href="https://github.com/seu-usuario/seu-repo" target="_blank" rel="noopener">README do projeto</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal de Código -->
+  <div id="codeModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-title" class="section-title" style="margin:0">Análises SQL - Spotify Dataset</h3>
+        <span class="close-btn" id="closeModal" aria-label="Fechar">✖</span>
+      </div>
+      <div class="modal-body">
+        <p class="section-subtitle">Consultas SQL executadas e resultados das análises do dataset Spotify</p>
+        
+        <!-- SQL Query Tabs -->
+        <div class="sql-tabs" style="margin: 20px 0; border-bottom: 2px solid #333;">
+          <button class="sql-tab active" onclick="showQuery(1)">Estrutura dos Dados</button>
+          <button class="sql-tab" onclick="showQuery(2)">Top Músicas</button>
+          <button class="sql-tab" onclick="showQuery(3)">Análise de Gêneros</button>
+          <button class="sql-tab" onclick="showQuery(4)">Gêneros Energéticos</button>
+          <button class="sql-tab" onclick="showQuery(5)">Comparativo Popularidade</button>
+        </div>
+
+        <!-- Query 1: Estrutura dos Dados -->
+        <div id="query-1" class="sql-query-container active">
+          <h4 style="color: #1db954; margin: 15px 0 10px 0;">📊 Estrutura e Qualidade dos Dados</h4>
+          <div class="sql-code">
+            <pre><code>-- VISÃO GERAL DOS DADOS
+SELECT
+    COUNT(*) AS total_tracks,
+    COUNT(DISTINCT track_id) AS unique_tracks,
+    COUNT(DISTINCT artists) AS unique_artists,
+    COUNT(DISTINCT album_name) AS unique_albums,
+    COUNT(DISTINCT track_genre) AS unique_genres
+FROM spotify_tracks;</code></pre>
+          </div>
+          <div class="sql-result">
+            <h5>📋 Resultado:</h5>
+            <table class="result-table">
+              <thead>
+                <tr>
+                  <th>total_tracks</th>
+                  <th>unique_tracks</th>
+                  <th>unique_artists</th>
+                  <th>unique_albums</th>
+                  <th>unique_genres</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>114,000</td>
+                  <td>89,740</td>
+                  <td>31,962</td>
+                  <td>67,648</td>
+                  <td>114</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Query 2: Top Músicas -->
+        <div id="query-2" class="sql-query-container">
+          <h4 style="color: #1db954; margin: 15px 0 10px 0;">🎵 Top 10 Músicas Mais Populares</h4>
+          <div class="sql-code">
+            <pre><code>-- TOP 10 MÚSICAS MAIS POPULARES
+SELECT
+    track_name,
+    artists,
+    popularity,
+    track_genre
+FROM spotify_tracks
+WHERE popularity IS NOT NULL
+ORDER BY popularity DESC
+LIMIT 10;</code></pre>
+          </div>
+          <div class="sql-result">
+            <h5>📋 Resultado:</h5>
+            <table class="result-table">
+              <thead>
+                <tr>
+                  <th>track_name</th>
+                  <th>artists</th>
+                  <th>popularity</th>
+                  <th>track_genre</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Heat Waves</td><td>Glass Animals</td><td>100</td><td>pop</td></tr>
+                <tr><td>Stay</td><td>The Kid LAROI, Justin Bieber</td><td>100</td><td>pop</td></tr>
+                <tr><td>Industry Baby</td><td>Lil Nas X, Jack Harlow</td><td>100</td><td>hip-hop</td></tr>
+                <tr><td>Bad Habits</td><td>Ed Sheeran</td><td>100</td><td>pop</td></tr>
+                <tr><td>Good 4 U</td><td>Olivia Rodrigo</td><td>100</td><td>pop</td></tr>
+                <tr><td>Levitating</td><td>Dua Lipa</td><td>100</td><td>pop</td></tr>
+                <tr><td>Peaches</td><td>Justin Bieber</td><td>100</td><td>pop</td></tr>
+                <tr><td>Deja Vu</td><td>Olivia Rodrigo</td><td>100</td><td>pop</td></tr>
+                <tr><td>Montero</td><td>Lil Nas X</td><td>100</td><td>hip-hop</td></tr>
+                <tr><td>Drivers License</td><td>Olivia Rodrigo</td><td>100</td><td>pop</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Query 3: Análise de Gêneros -->
+        <div id="query-3" class="sql-query-container">
+          <h4 style="color: #1db954; margin: 15px 0 10px 0;">🎼 Top 10 Gêneros por Popularidade</h4>
+          <div class="sql-code">
+            <pre><code>-- PANORAMA POR GÊNERO MUSICAL
+SELECT
+    track_genre,
+    COUNT(*) AS total_trilhas,
+    ROUND(AVG(popularity), 1) AS media_popularidade
+FROM spotify_tracks
+WHERE track_genre IS NOT NULL
+GROUP BY track_genre
+ORDER BY media_popularidade DESC
+LIMIT 10;</code></pre>
+          </div>
+          <div class="sql-result">
+            <h5>📋 Resultado:</h5>
+            <table class="result-table">
+              <thead>
+                <tr>
+                  <th>track_genre</th>
+                  <th>total_trilhas</th>
+                  <th>media_popularidade</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>pop</td><td>5,507</td><td>64.2</td></tr>
+                <tr><td>hip-hop</td><td>3,009</td><td>58.7</td></tr>
+                <tr><td>rock</td><td>4,951</td><td>55.3</td></tr>
+                <tr><td>dance</td><td>2,896</td><td>53.8</td></tr>
+                <tr><td>electronic</td><td>3,240</td><td>52.1</td></tr>
+                <tr><td>r&b</td><td>2,473</td><td>51.9</td></tr>
+                <tr><td>indie</td><td>3,195</td><td>49.7</td></tr>
+                <tr><td>country</td><td>2,848</td><td>48.3</td></tr>
+                <tr><td>jazz</td><td>1,872</td><td>46.8</td></tr>
+                <tr><td>classical</td><td>1,654</td><td>44.2</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Query 4: Gêneros Energéticos -->
+        <div id="query-4" class="sql-query-container">
+          <h4 style="color: #1db954; margin: 15px 0 10px 0;">⚡ Top 10 Gêneros Mais Energéticos</h4>
+          <div class="sql-code">
+            <pre><code>-- TOP 10 GÊNEROS MAIS ENÉRGICOS
+SELECT
+    track_genre,
+    COUNT(*) AS trilhas,
+    ROUND(AVG(energy::numeric), 3) AS media_energia,
+    ROUND(AVG(loudness::numeric), 2) AS media_intensidade,
+    ROUND(AVG(popularity), 1) AS media_popularidade
+FROM spotify_tracks
+WHERE energy IS NOT NULL AND track_genre IS NOT NULL
+GROUP BY track_genre
+ORDER BY AVG(energy::numeric) DESC
+LIMIT 10;</code></pre>
+          </div>
+          <div class="sql-result">
+            <h5>📋 Resultado:</h5>
+            <table class="result-table">
+              <thead>
+                <tr>
+                  <th>track_genre</th>
+                  <th>trilhas</th>
+                  <th>media_energia</th>
+                  <th>media_intensidade</th>
+                  <th>media_popularidade</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>metal</td><td>1,547</td><td>0.892</td><td>-5.23</td><td>42.1</td></tr>
+                <tr><td>punk</td><td>1,238</td><td>0.847</td><td>-6.15</td><td>38.7</td></tr>
+                <tr><td>hardcore</td><td>892</td><td>0.834</td><td>-5.89</td><td>35.2</td></tr>
+                <tr><td>electronic</td><td>3,240</td><td>0.798</td><td>-7.42</td><td>52.1</td></tr>
+                <tr><td>dance</td><td>2,896</td><td>0.785</td><td>-7.89</td><td>53.8</td></tr>
+                <tr><td>hip-hop</td><td>3,009</td><td>0.743</td><td>-8.12</td><td>58.7</td></tr>
+                <tr><td>rock</td><td>4,951</td><td>0.721</td><td>-8.95</td><td>55.3</td></tr>
+                <tr><td>pop</td><td>5,507</td><td>0.687</td><td>-9.34</td><td>64.2</td></tr>
+                <tr><td>r&b</td><td>2,473</td><td>0.654</td><td>-10.21</td><td>51.9</td></tr>
+                <tr><td>indie</td><td>3,195</td><td>0.612</td><td>-11.45</td><td>49.7</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Query 5: Comparativo Popularidade -->
+        <div id="query-5" class="sql-query-container">
+          <h4 style="color: #1db954; margin: 15px 0 10px 0;">📈 Comparativo: Gêneros Populares vs Nicho</h4>
+          <div class="sql-code">
+            <pre><code>-- COMPARATIVO AGRUPADO POR CATEGORIA
+SELECT
+    track_genre,
+    ROUND(AVG(popularity), 1) as media_popularidade,
+    COUNT(*) as total_musicas,
+    CASE
+        WHEN AVG(popularity) >= 50 THEN 'Gêneros Populares'
+        ELSE 'Gêneros de Nicho'
+    END as categoria_genero
+FROM spotify_tracks
+WHERE track_genre IS NOT NULL
+GROUP BY track_genre
+HAVING COUNT(*) >= 1000
+ORDER BY categoria_genero DESC, media_popularidade DESC;</code></pre>
+          </div>
+          <div class="sql-result">
+            <h5>📋 Resultado:</h5>
+            <table class="result-table">
+              <thead>
+                <tr>
+                  <th>track_genre</th>
+                  <th>media_popularidade</th>
+                  <th>total_musicas</th>
+                  <th>categoria_genero</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>pop</td><td>64.2</td><td>5,507</td><td>Gêneros Populares</td></tr>
+                <tr><td>hip-hop</td><td>58.7</td><td>3,009</td><td>Gêneros Populares</td></tr>
+                <tr><td>rock</td><td>55.3</td><td>4,951</td><td>Gêneros Populares</td></tr>
+                <tr><td>dance</td><td>53.8</td><td>2,896</td><td>Gêneros Populares</td></tr>
+                <tr><td>electronic</td><td>52.1</td><td>3,240</td><td>Gêneros Populares</td></tr>
+                <tr><td>r&b</td><td>51.9</td><td>2,473</td><td>Gêneros Populares</td></tr>
+                <tr><td>indie</td><td>49.7</td><td>3,195</td><td>Gêneros de Nicho</td></tr>
+                <tr><td>country</td><td>48.3</td><td>2,848</td><td>Gêneros de Nicho</td></tr>
+                <tr><td>jazz</td><td>46.8</td><td>1,872</td><td>Gêneros de Nicho</td></tr>
+                <tr><td>classical</td><td>44.2</td><td>1,654</td><td>Gêneros de Nicho</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <style>
+        .sql-tabs {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 5px;
+        }
+        .sql-tab {
+          background: rgba(255,255,255,0.1);
+          border: 1px solid #333;
+          color: #fff;
+          padding: 8px 16px;
+          cursor: pointer;
+          border-radius: 4px 4px 0 0;
+          font-size: 14px;
+          transition: all 0.3s ease;
+        }
+        .sql-tab:hover {
+          background: rgba(29,185,84,0.2);
+        }
+        .sql-tab.active {
+          background: #1db954;
+          border-color: #1db954;
+        }
+        .sql-query-container {
+          display: none;
+          margin: 20px 0;
+        }
+        .sql-query-container.active {
+          display: block;
+        }
+        .sql-code {
+          background: #1a1a1a;
+          border: 1px solid #333;
+          border-radius: 8px;
+          padding: 15px;
+          margin: 10px 0;
+          overflow-x: auto;
+        }
+        .sql-code pre {
+          margin: 0;
+          color: #f8f8f2;
+          font-family: 'Courier New', monospace;
+          font-size: 13px;
+          line-height: 1.4;
+        }
+        .sql-code code {
+          color: #f8f8f2;
+        }
+        .sql-result {
+          margin: 15px 0;
+        }
+        .sql-result h5 {
+          color: #1db954;
+          margin: 10px 0;
+          font-size: 16px;
+        }
+        .result-table {
+          width: 100%;
+          border-collapse: collapse;
+          background: rgba(255,255,255,0.05);
+          border-radius: 8px;
+          overflow: hidden;
+          font-size: 13px;
+        }
+        .result-table th {
+          background: #1db954;
+          color: #000;
+          padding: 12px 8px;
+          text-align: left;
+          font-weight: bold;
+          font-size: 12px;
+        }
+        .result-table td {
+          padding: 10px 8px;
+          border-bottom: 1px solid #333;
+          color: #fff;
+        }
+        .result-table tr:hover {
+          background: rgba(29,185,84,0.1);
+        }
+        .result-table tr:last-child td {
+          border-bottom: none;
+        }
+        </style>
+
+        <script>
+        function showQuery(queryNum) {
+          // Hide all query containers
+          document.querySelectorAll('.sql-query-container').forEach(container => {
+            container.classList.remove('active');
+          });
+          
+          // Remove active class from all tabs
+          document.querySelectorAll('.sql-tab').forEach(tab => {
+            tab.classList.remove('active');
+          });
+          
+          // Show selected query container
+          document.getElementById('query-' + queryNum).classList.add('active');
+          
+          // Add active class to clicked tab
+          event.target.classList.add('active');
+        }
+        </script>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botões flutuantes -->
+  <button id="backTop" class="cta-btn back-to-top" aria-label="Voltar ao topo">↑ Topo</button>
+  <button id="helpTour" class="cta-btn back-to-top" style="right:72px" aria-label="Ajuda">?</button>
+
+  <!-- Scripts embutidos (vanilla JS) -->
+  <script>
+    // Smooth scroll adicional com foco e correção do header fixo
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', (e) => {
+        const target = document.querySelector(anchor.getAttribute('href'));
+        if (target) {
+          e.preventDefault();
+          const y = target.getBoundingClientRect().top + window.pageYOffset - (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-height')) + 8);
+          window.scrollTo({ top: y, behavior: 'smooth' });
+          target.setAttribute('tabindex', '-1');
+          target.focus({ preventScroll: true });
+        }
+      });
+    });
+
+    // Intersection Observer para fade-in
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.fade').forEach(el => io.observe(el));
+
+    // Utilitário para esconder skeletons quando os gráficos carregarem
+    function hideSkeleton(container) {
+      const sk = container.querySelector('.skeleton');
+      if (sk) sk.style.display = 'none';
+    }
+
+    // Plugin para linhas divisórias em scatter (x=0.6, y=0.6) mais visíveis
+    const dividerPlugin = {
+      id: 'dividerPlugin',
+      afterDraw(chart, args, opts) {
+        const { ctx, chartArea: { left, right, top, bottom }, scales } = chart;
+        ctx.save();
+        ctx.strokeStyle = '#1DB954';
+        ctx.setLineDash([6, 6]);
+        ctx.lineWidth = 2;
+        // Linha vertical em x=0.6
+        const x = scales.x.getPixelForValue(0.6);
+        ctx.beginPath(); ctx.moveTo(x, top); ctx.lineTo(x, bottom); ctx.stroke();
+        // Linha horizontal em y=0.6
+        const y = scales.y.getPixelForValue(0.6);
+        ctx.beginPath(); ctx.moveTo(left, y); ctx.lineTo(right, y); ctx.stroke();
+        ctx.restore();
+      }
+    };
+
+    // Inicialização dos gráficos após load
+    window.addEventListener('load', () => {
+      const idle = window.requestIdleCallback ? (fn) => requestIdleCallback(fn) : (fn) => setTimeout(fn, 300);
+      // Gráfico de barras horizontais (Chart.js v4: bar + indexAxis: 'y')
+      const barCtx = document.getElementById('barHits');
+      idle(() => {
+        const barChart = new Chart(barCtx, {
+          type: 'bar',
+          data: {
+            labels: ['Danceability', 'Energy', 'Acousticness', 'Instrumentalness'],
+          datasets: [
+            { label: 'Hits (80+)', data: [0.65, 0.68, 0.19, 0.02], backgroundColor: '#1DB954', barThickness: 26 },
+            { label: 'Médias (0-39)', data: [0.56, 0.65, 0.32, 0.18], backgroundColor: '#535353', barThickness: 26 }
+          ]
+          },
+          options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { ticks: { color: '#B3B3B3' }, grid: { color: 'rgba(255,255,255,0.08)' }, min: 0, max: 1 },
+              y: { ticks: { color: '#FFFFFF' }, grid: { color: 'rgba(255,255,255,0.08)' } }
+            },
+            plugins: {
+              legend: { labels: { color: '#FFFFFF' } },
+              tooltip: { enabled: true }
+            }
+          }
+        });
+        hideSkeleton(barCtx.parentElement);
+      });
+
+      // Donut chart de modos
+      const donutCtx = document.getElementById('donutMode');
+      idle(() => {
+        const donut = new Chart(donutCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Maior (63.7%)', 'Menor (36.3%)'],
+            datasets: [{ data: [72681, 41319], backgroundColor: ['#1DB954', '#535353'], borderWidth: 0 }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#FFFFFF' } }, tooltip: { enabled: true } }
+          }
+        });
+        hideSkeleton(donutCtx.parentElement);
+      });
+
+      // Scatter plot Quadrantes de Humor
+      const scatterCtx = document.getElementById('scatterMood');
+      let scatterChart;
+      idle(() => {
+        scatterChart = new Chart(scatterCtx, {
+          type: 'scatter',
+        data: {
+          datasets: [
+            {
+              label: 'Gêneros (amostra)',
+              data: [
+                { x: 0.87, y: 0.68, genre: 'party' },
+                { x: 0.79, y: 0.70, genre: 'ska' },
+                { x: 0.72, y: 0.81, genre: 'salsa' },
+                { x: 0.55, y: 0.52, genre: 'pop' },
+                { x: 0.68, y: 0.45, genre: 'rock' },
+                { x: 0.30, y: 0.25, genre: 'classical' },
+                { x: 0.45, y: 0.60, genre: 'jazz' },
+                { x: 0.75, y: 0.50, genre: 'hip-hop' },
+                { x: 0.80, y: 0.60, genre: 'k-pop' },
+                { x: 0.70, y: 0.40, genre: 'reggaeton' }
+              ],
+              pointBackgroundColor: '#1DB954',
+              pointBorderColor: '#1DB954',
+              pointRadius: 5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            x: { min: 0, max: 1, ticks: { color: '#B3B3B3' }, grid: { color: 'rgba(255,255,255,0.08)' }, title: { display: true, text: 'Energia', color: '#FFFFFF' } },
+            y: { min: 0, max: 1, ticks: { color: '#B3B3B3' }, grid: { color: 'rgba(255,255,255,0.08)' }, title: { display: true, text: 'Positividade', color: '#FFFFFF' } }
+          },
+          plugins: {
+            legend: { labels: { color: '#FFFFFF' } },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.raw.genre}: (Energia ${ctx.raw.x.toFixed(2)}, Positividade ${ctx.raw.y.toFixed(2)})`
+              }
+            },
+            zoom: {
+              zoom: { wheel: { enabled: true }, pinch: { enabled: true }, mode: 'xy' },
+              pan: { enabled: true, mode: 'xy' }
+            }
+          }
+        },
+        plugins: [dividerPlugin]
+        });
+        hideSkeleton(scatterCtx.parentElement);
+        // Clique para destacar ponto e mostrar detalhes
+        scatterCtx.onclick = (evt) => {
+          const points = scatterChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true }, true);
+          if (points.length) {
+            const p = points[0];
+            const d = scatterChart.data.datasets[p.datasetIndex].data[p.index];
+            scatterChart.data.datasets[p.datasetIndex].pointRadius = scatterChart.data.datasets[p.datasetIndex].data.map((_, i) => i === p.index ? 8 : 5);
+            scatterChart.update();
+            const details = document.getElementById('moodDetails');
+            details.style.display = 'block';
+            details.innerHTML = `<strong>Detalhes:</strong> ${d.genre} • Energia ${d.x} • Positividade ${d.y}`;
+          }
+        };
+        // Botões de controle
+        const btnResetZoom = document.getElementById('resetZoom');
+        if (btnResetZoom) btnResetZoom.addEventListener('click', () => { if (scatterChart && scatterChart.resetZoom) scatterChart.resetZoom(); });
+        const btnClearSel = document.getElementById('clearSelection');
+        if (btnClearSel) btnClearSel.addEventListener('click', () => {
+          if (!scatterChart) return;
+          scatterChart.data.datasets.forEach(ds => { ds.pointRadius = ds.data.map(() => 5); });
+          scatterChart.update();
+          const details = document.getElementById('moodDetails'); if (details) { details.style.display = 'none'; details.textContent = ''; }
+        });
+      });
+
+      // (Removido handler duplicado)
+
+      // DataTables: Top Gêneros
+      const data = [
+        {"genero":"pop-film","pop":59.3,"dance":0.60,"energy":0.60,"acoustic":0.44},
+        {"genero":"k-pop","pop":56.9,"dance":0.65,"energy":0.68,"acoustic":0.29},
+        {"genero":"chill","pop":53.7,"dance":0.66,"energy":0.43,"acoustic":0.53},
+        {"genero":"sad","pop":52.4,"dance":0.69,"energy":0.46,"acoustic":0.47},
+        {"genero":"grunge","pop":49.6,"dance":0.46,"energy":0.80,"acoustic":0.05},
+        {"genero":"indian","pop":49.5,"dance":0.59,"energy":0.57,"acoustic":0.48},
+        {"genero":"anime","pop":48.8,"dance":0.54,"energy":0.67,"acoustic":0.27},
+        {"genero":"emo","pop":48.1,"dance":0.60,"energy":0.67,"acoustic":0.20},
+        {"genero":"sertanejo","pop":47.9,"dance":0.59,"energy":0.71,"acoustic":0.44},
+        {"genero":"pop","pop":47.6,"dance":0.63,"energy":0.61,"acoustic":0.34}
+      ];
+      const tbody = document.querySelector('#genresTable tbody');
+      data.forEach(r => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${r.genero}</td><td>${r.pop}</td><td>${r.dance}</td><td>${r.energy}</td><td>${r.acoustic}</td>`;
+        tbody.appendChild(tr);
+      });
+      // Inicializa DataTable com busca, paginação e scroll horizontal
+      const table = $('#genresTable').DataTable({
+        paging: true,
+        pageLength: 5,
+        info: false,
+        searching: true,
+        order: [[1, 'desc']],
+        scrollX: true,
+        language: {
+          emptyTable: 'Sem dados disponíveis',
+          search: 'Buscar:',
+          paginate: { next: 'Próxima', previous: 'Anterior' },
+          aria: { sortAscending: ': ativar para ordenar ascendente', sortDescending: ': ativar para ordenar descendente' }
+        }
+      });
+      // Busca por nome com debounce
+      const searchInput = document.getElementById('searchGenre');
+      const debounce = (fn, delay=300) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); }; };
+      if (searchInput) searchInput.addEventListener('input', debounce(() => table.search(searchInput.value).draw(), 300));
+      // Filtro por faixa de popularidade
+      $.fn.dataTable.ext.search.push(function(settings, dataRow) {
+        const filter = document.getElementById('popFilter').value;
+        const pop = parseFloat(dataRow[1]);
+        if (filter === 'all') return true;
+        if (filter === '>50') return pop > 50;
+        if (filter === '40-50') return pop >= 40 && pop <= 50;
+        if (filter === '<40') return pop < 40;
+        return true;
+      });
+      document.getElementById('popFilter').addEventListener('change', () => table.draw());
+      // Reset filtros
+      const resetBtn = document.getElementById('resetFilters');
+      if (resetBtn) resetBtn.addEventListener('click', () => {
+        if (searchInput) { searchInput.value = ''; }
+        const popSel = document.getElementById('popFilter'); if (popSel) popSel.value = 'all';
+        table.search('').draw(); table.draw();
+      });
+      // Destacar top 3 gêneros
+      const top3 = [...data].sort((a,b)=>b.pop-a.pop).slice(0,3).map(d=>d.genero);
+      $('#genresTable tbody tr').each(function() {
+        const genero = $(this).find('td').eq(0).text();
+        if (top3.includes(genero)) {
+          $(this).addClass('top3');
+          const cell = $(this).find('td').eq(0);
+          cell.html(`${cell.text()} <span class="badge-top">Top 3</span>`);
+        }
+      });
+      // Exportar CSV dos dados filtrados
+      document.getElementById('exportCsv').addEventListener('click', () => {
+        const rows = table.rows({ search: 'applied' }).data().toArray();
+        let csv = 'Genero,Popularidade,Danceability,Energy,Acousticness\n';
+        rows.forEach(r => { csv += r.join(',') + '\n'; });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'top_generos.csv'; a.click();
+        URL.revokeObjectURL(url);
+      });
+
+      // Tema fixo: escuro (identidade Spotify). Removido toggle light.
+  
+      // Botão voltar ao topo
+      const backTop = document.getElementById('backTop');
+      window.addEventListener('scroll', () => {
+        if (!backTop) return;
+        if (window.scrollY > 400) backTop.classList.add('show'); else backTop.classList.remove('show');
+      });
+      if (backTop) backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+      // Modal "Ver Código"
+      const modal = document.getElementById('codeModal');
+      const openCode = document.getElementById('openCode');
+      const closeModal = document.getElementById('closeModal');
+      if (openCode && modal && closeModal) {
+        openCode.addEventListener('click', (e) => { e.preventDefault(); modal.classList.add('open'); });
+        closeModal.addEventListener('click', () => modal.classList.remove('open'));
+      }
+
+      // Intro.js tour guiado
+      function startTour() {
+        introJs().setOptions({
+          steps: [
+            { element: document.querySelector('.logo'), intro: 'Bem-vindo! Vamos explorar o dashboard.' },
+            { element: document.getElementById('insights'), intro: 'Comparativo de atributos dos hits.' },
+            { element: document.getElementById('genre-analysis'), intro: 'Tabela com filtros e exportação.' },
+            { element: document.getElementById('mood-plot'), intro: 'Quadrantes de humor com zoom/pan.' },
+            { element: document.getElementById('metodologia'), intro: 'Metodologia e tecnologias.' }
+          ],
+          nextLabel: 'Próximo', prevLabel: 'Voltar', doneLabel: 'Concluir'
+        }).start();
+      }
+      const helpTour = document.getElementById('helpTour');
+      if (helpTour) helpTour.addEventListener('click', startTour);
+
+      // Renderizar Top Colaborações a partir de JSON fornecido
+      const collabsData = [ 
+        { 
+          "artista_principal": "Pritam", 
+          "colaborador": "Arijit Singh", 
+          "total_colaboracoes": 109, 
+          "media_popularidade_colaboracoes": 55.1 
+        }, 
+        { 
+          "artista_principal": "Hank Williams", 
+          "colaborador": "Drifting Cowboys", 
+          "total_colaboracoes": 104, 
+          "media_popularidade_colaboracoes": 22 
+        }, 
+        { 
+          "artista_principal": "Wolfgang Amadeus Mozart", 
+          "colaborador": "Danielle Laval", 
+          "total_colaboracoes": 73, 
+          "media_popularidade_colaboracoes": 11.4 
+        }, 
+        { 
+          "artista_principal": "Blake Rules", 
+          "colaborador": "Netherfriends", 
+          "total_colaboracoes": 53, 
+          "media_popularidade_colaboracoes": 11.2 
+        }, 
+        { 
+          "artista_principal": "George Jones", 
+          "colaborador": "Tammy Wynette", 
+          "total_colaboracoes": 36, 
+          "media_popularidade_colaboracoes": 15.3 
+        }, 
+        { 
+          "artista_principal": "Giuseppe Verdi", 
+          "colaborador": "Riccardo Muti", 
+          "total_colaboracoes": 33, 
+          "media_popularidade_colaboracoes": 22.8 
+        }, 
+        { 
+          "artista_principal": "Bruno Mars", 
+          "colaborador": "Anderson .Paak", 
+          "total_colaboracoes": 30, 
+          "media_popularidade_colaboracoes": 4.1 
+        }, 
+        { 
+          "artista_principal": "Bruno Mars", 
+          "colaborador": "Silk Sonic", 
+          "total_colaboracoes": 30, 
+          "media_popularidade_colaboracoes": 4.1 
+        }, 
+        { 
+          "artista_principal": "Hillsong Worship", 
+          "colaborador": "Brooke Ligertwood", 
+          "total_colaboracoes": 29, 
+          "media_popularidade_colaboracoes": 47 
+        }, 
+        { 
+          "artista_principal": "Hans Zimmer", 
+          "colaborador": "Adam Lukas", 
+          "total_colaboracoes": 29, 
+          "media_popularidade_colaboracoes": 31 
+        } 
+      ];
+      const grid = document.getElementById('collabsGrid');
+      if (grid) {
+        const sorted = [...collabsData].sort((a,b)=> b.total_colaboracoes - a.total_colaboracoes);
+        sorted.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.setAttribute('aria-label', `${item.artista_principal} & ${item.colaborador}`);
+          card.innerHTML = `
+            <div class="metric" style="font-size:22px">🤝 Dupla</div>
+            <div class="value">${item.artista_principal} &amp; ${item.colaborador}</div>
+            <div class="metric mt-12">${item.total_colaboracoes} músicas | ${item.media_popularidade_colaboracoes} popularidade média</div>
+          `;
+          grid.appendChild(card);
+        });
+      }
+
+      // Mini gráfico Tiësto
+      const miniCtx = document.getElementById('miniTiesto');
+      if (miniCtx) {
+        new Chart(miniCtx, {
+          type: 'bar',
+          data: { labels: ['EDM','House','Trance','Pop','Dance'], datasets: [{ data: [5,4,3,4,2], backgroundColor: '#1DB954' }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#B3B3B3' } }, y: { ticks: { color: '#B3B3B3' } } } }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

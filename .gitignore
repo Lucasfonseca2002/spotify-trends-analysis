@@ -1,0 +1,52 @@
+# IDE Files
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Database Files
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Temporary Files
+*.tmp
+*.temp
+~*
+
+# Node modules (caso adicione JavaScript no futuro)
+node_modules/
+npm-debug.log*
+
+# Python (caso use scripts Python)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.env
+
+# Backup files
+*.bak
+*.backup
+
+# Large data files (manter apenas o dataset principal)
+*.csv.backup
+data/processed/
+data/temp/
+
+# Personal configuration files
+config.local.*
+.env.local
