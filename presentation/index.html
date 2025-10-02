@@ -183,6 +183,93 @@
     select.btn:focus { outline: 2px solid var(--color-primary); }
     select.btn option { color: #111827; background: #ffffff; }
 
+    /* Estilos específicos para DataTables */
+    .dataTables_wrapper {
+      color: var(--color-text) !important;
+    }
+    
+    /* Filtros e controles do DataTables */
+    .dataTables_length select,
+    .dataTables_filter input {
+      background: var(--color-surface) !important;
+      color: var(--color-text) !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      border-radius: 8px !important;
+      padding: 8px 12px !important;
+      font-family: inherit !important;
+    }
+    
+    .dataTables_length select:focus,
+    .dataTables_filter input:focus {
+      outline: 2px solid var(--color-primary) !important;
+      border-color: var(--color-primary) !important;
+    }
+    
+    /* Opções do dropdown */
+    .dataTables_length select option {
+      background: var(--color-surface) !important;
+      color: var(--color-text) !important;
+      padding: 8px !important;
+    }
+    
+    /* Labels dos controles */
+    .dataTables_length label,
+    .dataTables_filter label {
+      color: var(--color-text) !important;
+      font-weight: 500 !important;
+    }
+    
+    /* Info e paginação */
+    .dataTables_info,
+    .dataTables_paginate {
+      color: var(--color-text-secondary) !important;
+    }
+    
+    /* Botões de paginação */
+    .dataTables_paginate .paginate_button {
+      background: rgba(255,255,255,0.04) !important;
+      color: var(--color-text) !important;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+      border-radius: 6px !important;
+      margin: 0 2px !important;
+      padding: 6px 12px !important;
+    }
+    
+    .dataTables_paginate .paginate_button:hover {
+      background: rgba(29,185,84,0.15) !important;
+      color: var(--color-primary) !important;
+      border-color: var(--color-primary) !important;
+    }
+    
+    .dataTables_paginate .paginate_button.current {
+      background: var(--color-primary) !important;
+      color: #000 !important;
+      border-color: var(--color-primary) !important;
+    }
+    
+    /* Cabeçalho da tabela */
+    .dataTable thead th {
+      background: rgba(40,40,40,0.9) !important;
+      color: var(--color-text) !important;
+      border-bottom: 2px solid var(--color-primary) !important;
+      font-weight: 600 !important;
+    }
+    
+    /* Linhas da tabela */
+    .dataTable tbody tr {
+      background: rgba(40,40,40,0.6) !important;
+      border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+    }
+    
+    .dataTable tbody tr:hover {
+      background: rgba(29,185,84,0.1) !important;
+    }
+    
+    .dataTable tbody td {
+      color: var(--color-text) !important;
+      border: none !important;
+    }
+
     /* Modal "Ver Código" */
     .modal { position: fixed; inset: 0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,0.55); z-index: 1000; }
     .modal.open { display:flex; }
