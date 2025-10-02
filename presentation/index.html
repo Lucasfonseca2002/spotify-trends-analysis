@@ -1315,6 +1315,33 @@ ORDER BY categoria_genero DESC, media_popularidade DESC;</code></pre>
           options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#B3B3B3' } }, y: { ticks: { color: '#B3B3B3' } } } }
         });
       }
+
+      // Força estilo escuro no campo de busca DataTables
+      setTimeout(() => {
+        const searchInputs = document.querySelectorAll('.dataTables_filter input, input[type="search"]');
+        searchInputs.forEach(input => {
+          input.style.setProperty('background', '#2a2a2a', 'important');
+          input.style.setProperty('background-color', '#2a2a2a', 'important');
+          input.style.setProperty('color', '#ffffff', 'important');
+          input.style.setProperty('border', '1px solid rgba(255,255,255,0.12)', 'important');
+          input.style.setProperty('border-radius', '8px', 'important');
+          input.style.setProperty('padding', '10px 14px', 'important');
+        });
+      }, 500);
+
+      // Observer para garantir que o estilo seja aplicado mesmo após mudanças dinâmicas
+      const observer = new MutationObserver(() => {
+        const searchInputs = document.querySelectorAll('.dataTables_filter input, input[type="search"]');
+        searchInputs.forEach(input => {
+          if (input.style.backgroundColor !== 'rgb(42, 42, 42)') {
+            input.style.setProperty('background', '#2a2a2a', 'important');
+            input.style.setProperty('background-color', '#2a2a2a', 'important');
+            input.style.setProperty('color', '#ffffff', 'important');
+          }
+        });
+      });
+      
+      observer.observe(document.body, { childList: true, subtree: true });
     });
   </script>
 </body>
