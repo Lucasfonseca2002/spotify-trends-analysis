@@ -176,9 +176,8 @@ Project - Analise de Tendências Musicais Spotify/
 │
 ├── presentation/                     # Apresentação web
 │   ├── index.html                   # Dashboard interativo
-│   └── extraction_data_pdf.pdf     # Documentação original
 │
-└── README.md                        # Este arquivo
+└── README.md                        
 ```
 
 ## 🚀 Como Executar o Projeto
