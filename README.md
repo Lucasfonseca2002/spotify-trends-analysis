@@ -10,6 +10,12 @@ Este projeto realiza uma análise abrangente de tendências musicais utilizando 
 - Explorar correlações entre características sonoras e popularidade
 - Criar visualizações interativas dos insights descobertos
 
+## 🌐 Demo Online
+
+**🚀 [Acesse o Dashboard Interativo](https://lucasfonseca2002.github.io/spotify-trends-analysis/presentation/)**
+
+> O dashboard está hospedado no GitHub Pages e pode ser acessado diretamente pelo navegador.
+
 ## 📊 Dataset
 
 ### Fonte dos Dados
@@ -238,12 +244,6 @@ O projeto inclui um dashboard web interativo que apresenta:
 3. **Análise de Gêneros**: Comparação entre gêneros musicais
 4. **Gêneros Energéticos**: Ranking de energia por gênero
 5. **Comparativo de Popularidade**: Análise de fatores de sucesso
-
-## 🌐 Demo Online
-
-**🚀 [Acesse o Dashboard Interativo](https://lucasfonseca2002.github.io/spotify-trends-analysis/presentation/)**
-
-> O dashboard está hospedado no GitHub Pages e pode ser acessado diretamente pelo navegador.
 
 ## 👨‍💻 Autor
 
